@@ -1,0 +1,45 @@
+version: '3.4'
+
+services:
+  #service 1
+  database:
+    image: mysql:5.6
+    container_name: test-db
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_DATABASE=docker_test
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - my-datavolume:/var/lib/mysql
+
+  #service 2
+  backend:
+    build: ./docker-springboot
+    container_name: test-backend
+    environment:
+    #server name is the container name of database
+    - DB_SERVER=database
+    - MYSQL_DATABASE=docker_test
+    - MYSQL_USER=root
+    - MYSQL_PASSWORD=root
+    ports:
+      - 8080:8080
+    links:
+      - database
+    depends_on:
+      - database
+  
+    #service 3
+  frontend:
+    build: ./angular-docker
+    container_name: test-ui
+    ports:
+      - 4201:80
+    # links to a service
+    links:
+      - backend
+
+volumes:
+  my-datavolume:
